@@ -24,7 +24,7 @@ export class AudioDiskPlayer extends FBlock {
     addressHigh: number,
     addressLow: number
   ) {
-    super(0x49, instanceID, writeMessage, sourceAddrHigh, sourceAddrLow, addressHigh, addressLow)
+    super(0x31, instanceID, writeMessage, sourceAddrHigh, sourceAddrLow, addressHigh, addressLow)
     this.registerFunction(0x200, DeckStatus)
     this.registerFunction(0x0201, TimePosition)
     this.registerFunction(0x202, TrackPosition)

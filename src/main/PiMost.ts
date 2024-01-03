@@ -1,20 +1,20 @@
 import { SocketMost, SocketMostClient, messages } from 'socketmost'
 import { MessageNames, Socket } from './Socket'
 import { AudioDiskPlayer } from './PiMostFunctions/AudioDiskPlayer/AudioDiskPlayer'
-import { AmFmTuner } from './PiMostFunctions/AmFm/AmFmTuner'
 import { fBlocks, opTypes } from './PiMostFunctions/Common/enums'
 import { Action, AvailableSources } from './Globals'
-import { U240 } from './PiMostFunctions/JlrAudio/u240'
 import { Amplifier } from './PiMostFunctions/Amplifier/Amplifier'
+import { Vehicle } from './PiMostFunctions/Vehicle/Vehicle'
 
 const { Os8104Events } = messages
 
 type Interfaces = {
   AudioDiskPlayer: AudioDiskPlayer
-  U240: U240
-  AmFmTuner: AmFmTuner
+  //U240: U240
+  //AmFmTuner: AmFmTuner
   Amplifier: Amplifier
-  SecAmplifier: Amplifier
+  //SecAmplifier: Amplifier
+  Vehicle: Vehicle
 }
 type InterfaceKeys = keyof Interfaces
 
@@ -41,44 +41,42 @@ export class PiMost {
     this.socket.on(MessageNames.Stream, (stream) => {
       this.stream(stream)
     })
-    const audioDiskPlayer = new AudioDiskPlayer(0x02, this.sendMessage, 0x01, 0x80, 0x01, 0x10)
-    const u240 = new U240(0x01, this.sendMessage, 0x01, 0x61, 0x01, 0x10)
-    const amFmTuner = new AmFmTuner(0x01, this.sendMessage, 0x01, 0x80, 0x01, 0x10)
-    const amplifier = new Amplifier(0xa1, this.sendMessage, 0x01, 0x61, 0x01, 0x10)
-    const secAmplifier = new Amplifier(0x05, this.sendMessage, 0x01, 0x86, 0x01, 0x10)
+    const audioDiskPlayer = new AudioDiskPlayer(0x02, this.sendMessage, 0x01, 0x05, 0x01, 0x10)
+    //const u240 = new U240(0x01, this.sendMessage, 0x01, 0x61, 0x01, 0x10)
+    //const amFmTuner = new AmFmTuner(0x01, this.sendMessage, 0x01, 0x80, 0x01, 0x10)
+    const amplifier = new Amplifier(0x01, this.sendMessage, 0x01, 0x01, 0x01, 0x10)
+    // const secAmplifier = new Amplifier(0x05, this.sendMessage, 0x01, 0x86, 0x01, 0x10)
+    const vehicle = new Vehicle(0x0, this.sendMessage, 0x01, 0x0, 0x01, 0x10)
     // this.interfaces.secAmplifier = new Amplifier(0x20, this.sendMessage, 0x01, 0x86, 0x01, 0x10)
     this.interfaces = {
       AudioDiskPlayer: audioDiskPlayer,
-      U240: u240,
-      AmFmTuner: amFmTuner,
+      //U240: u240,
+      //AmFmTuner: amFmTuner,
       Amplifier: amplifier,
-      SecAmplifier: secAmplifier
+      //SecAmplifier: secAmplifier
+      Vehicle: vehicle
     }
     this.stabilityTimeout = null
     this.sourcesInterval = null
-    this.currentSource = 'AmFmTuner'
+    this.currentSource = 'AudioDiskPlayer'
 
     this.socketMostClient.on('connected', () => {
       console.log('client connected')
       this.interfaces.AudioDiskPlayer.on('statusUpdate', (data) => {
         socket.sendStatusUpdate('audioDiskPlayerUpdate', data)
       })
-      this.interfaces.U240.on('statusUpdate', (data) => {
-        socket.sendStatusUpdate('volumeUpdate', data)
-      })
-      this.interfaces.AmFmTuner.on('statusUpdate', (data) => {
-        socket.sendStatusUpdate('amFmTunerUpdate', data)
-      })
       this.interfaces.Amplifier.on('statusUpdate', (data) => {
         socket.sendStatusUpdate('amplifierUpdate', data)
+      })
+      this.interfaces.Vehicle.on('statusUpdate', (data) => {
+        socket.sendStatusUpdate('vehicleUpdate', data)
       })
 
       socket.on('newConnection', () => {
         console.log('SENDING FULL UPDATE')
         socket.sendStatusUpdate('audioDiskPlayerFullUpdate', this.interfaces.AudioDiskPlayer.state)
-        socket.sendStatusUpdate('volumeFullUpdate', this.interfaces.U240.state)
-        socket.sendStatusUpdate('amFmTunerFullUpdate', this.interfaces.AmFmTuner.state)
         socket.sendStatusUpdate('amplifierFullUpdate', this.interfaces.Amplifier.state)
+        socket.sendStatusUpdate('vehicleFullUpdate', this.interfaces.Vehicle.state)
       })
 
       socket.on('action', (message: Action) => {
@@ -166,24 +164,24 @@ export class PiMost {
   }
 
   async changeSource(newSource: AvailableSources) {
-    console.log('new source', newSource)
-    await this.interfaces.SecAmplifier.functions[0x112].startResult([0x01])
-    console.log('deallocate requesting')
-    await this.disconnectSource()
-    console.log('waiting for result')
-    await this.waitForDealloc(this.currentSource)
-    console.log('deallocated')
-    console.log('allocating new')
-    await this.allocateSource(newSource)
-    console.log('allocated new')
-    const data = await this.waitForAlloc(newSource)
-    console.log('allocated', data)
-    console.log('connecting')
-    await this.interfaces.SecAmplifier.functions[0x111].startResult([
-      0x01,
-      data.srcDelay,
-      ...data.channelList
-    ])
+    //console.log('new source', newSource)
+    //await this.interfaces.SecAmplifier.functions[0x112].startResult([0x01])
+    //console.log('deallocate requesting')
+    //await this.disconnectSource()
+    // console.log('waiting for result')
+    // await this.waitForDealloc(this.currentSource)
+    // console.log('deallocated')
+    // console.log('allocating new')
+    // await this.allocateSource(newSource)
+    // console.log('allocated new')
+    // const data = await this.waitForAlloc(newSource)
+    // console.log('allocated', data)
+    // console.log('connecting')
+    // await this.interfaces.SecAmplifier.functions[0x111].startResult([
+    //   0x01,
+    //   data.srcDelay,
+    //   ...data.channelList
+    // ])
   }
 
   async disconnectSource() {

@@ -35,10 +35,6 @@ export class Amplifier extends FBlock {
     this.registerFunction(0x203, Treble)
     this.registerFunction(0x204, Fader)
     this.registerFunction(0x402, Subwoofer)
-    this.registerFunction(0xe22, CustAudio)
-    this.registerFunction(0xe21, CustSurround)
-    this.registerFunction(0xe20, CustSpeakers)
-    this.registerFunction(0xe09, Source)
   }
 
   // sendMessage({fktID, opType, data}) {
